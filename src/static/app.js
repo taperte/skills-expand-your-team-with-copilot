@@ -519,6 +519,10 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    // Create share URL for the activity
+    const shareUrl = `${window.location.origin}${window.location.pathname}`;
+    const shareText = `Check out ${name} at Mergington High School! ${details.description}`;
+    
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -551,6 +555,24 @@ document.addEventListener("DOMContentLoaded", () => {
             )
             .join("")}
         </ul>
+      </div>
+      <div class="share-buttons">
+        <div class="share-label">Share:</div>
+        <button class="share-btn share-facebook" data-activity="${name}" data-url="${shareUrl}" data-text="${shareText}" title="Share on Facebook">
+          <span class="share-icon">f</span>
+        </button>
+        <button class="share-btn share-twitter" data-activity="${name}" data-url="${shareUrl}" data-text="${shareText}" title="Share on Twitter">
+          <span class="share-icon">𝕏</span>
+        </button>
+        <button class="share-btn share-whatsapp" data-activity="${name}" data-url="${shareUrl}" data-text="${shareText}" title="Share on WhatsApp">
+          <span class="share-icon">⚬</span>
+        </button>
+        <button class="share-btn share-email" data-activity="${name}" data-url="${shareUrl}" data-text="${shareText}" title="Share via Email">
+          <span class="share-icon">✉</span>
+        </button>
+        <button class="share-btn share-copy" data-activity="${name}" data-url="${shareUrl}" data-text="${shareText}" title="Copy link">
+          <span class="share-icon">🔗</span>
+        </button>
       </div>
       <div class="activity-card-actions">
         ${
@@ -587,7 +609,45 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add click handlers for share buttons
+    const shareButtons = activityCard.querySelectorAll(".share-btn");
+    shareButtons.forEach((button) => {
+      button.addEventListener("click", handleShare);
+    });
+
     activitiesList.appendChild(activityCard);
+  }
+
+  // Handle share button clicks
+  function handleShare(event) {
+    const button = event.currentTarget;
+    const activityName = button.dataset.activity;
+    const url = button.dataset.url;
+    const text = button.dataset.text;
+
+    // Determine which platform to share to
+    if (button.classList.contains("share-facebook")) {
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      window.open(facebookUrl, "_blank", "width=600,height=400");
+    } else if (button.classList.contains("share-twitter")) {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(twitterUrl, "_blank", "width=600,height=400");
+    } else if (button.classList.contains("share-whatsapp")) {
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
+      window.open(whatsappUrl, "_blank");
+    } else if (button.classList.contains("share-email")) {
+      const subject = `Check out ${activityName} at Mergington High School`;
+      const body = `${text}\n\nLearn more: ${url}`;
+      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    } else if (button.classList.contains("share-copy")) {
+      // Copy link to clipboard
+      navigator.clipboard.writeText(url).then(() => {
+        showMessage("Link copied to clipboard!", "success");
+      }).catch((error) => {
+        console.error("Failed to copy link:", error);
+        showMessage("Failed to copy link. Please try again.", "error");
+      });
+    }
   }
 
   // Event listeners for search and filter
